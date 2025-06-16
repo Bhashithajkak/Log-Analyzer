@@ -1,1 +1,12 @@
+# Ignore dataset file
 dataset/NASA_access_log_Jul95
+
+# Ignore all log files
+*.log
+
+# Ignore build directories
+/build
+
+# Ignore compiled files
+parallel_with_openmp
+serial_analysis

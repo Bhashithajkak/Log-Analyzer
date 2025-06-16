@@ -6,24 +6,8 @@
 
 #define MAX_LINE_LENGTH 8192  // Large buffer for performance
 
-// Count non-overlapping occurrences of keyword in line
 int count_keyword_occurrences(const char *line, const char *keyword) {
-    int count = 0;
-    size_t keyword_len = strlen(keyword);
-    
     return (keyword[0] && strstr(line, keyword)) ? 1 : 0;
-
-    //if (keyword_len == 0) return 0;
-
-    //Find all keywords in the line
-    // const char *ptr = line;
-
-    // while ((ptr = strstr(ptr, keyword)) != NULL) {
-    //     count++;
-    //     ptr += keyword_len;
-    // }
-
-    // return count;
 }
 
 int main(int argc, char *argv[]) {
