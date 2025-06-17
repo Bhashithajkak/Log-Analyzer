@@ -4,7 +4,6 @@
 #include <string.h>
 #include <time.h> // To get the execution time
 
-#define MAX_LINE_LENGTH 8192  // Large buffer for performance
 
 int count_keyword_occurrences(const char *line, const char *keyword) {
     return (keyword[0] && strstr(line, keyword)) ? 1 : 0;

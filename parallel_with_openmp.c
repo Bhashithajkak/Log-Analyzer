@@ -5,6 +5,7 @@
 #include <omp.h>
 
 #define CHUNK_INIT 4096       // Initial capacity for lines
+#define NUM_OF_THREADS 4
 
 static inline int count_keyword_occurrences(const char *line, const char *keyword)
 {
@@ -54,13 +55,14 @@ int main(int argc, char *argv[]) {
             lines = tmp;
         }
 
-        lines[nlines++] = strdup(line); // store copy
+        lines[nlines++] = strdup(line); // store copy of line
     }
 
     free(line);
     fclose(file);
 
     // Parallel processing
+    omp_set_num_threads(NUM_OF_THREADS);
     double start_time = omp_get_wtime();
 
     long total = 0;
@@ -80,7 +82,7 @@ int main(int argc, char *argv[]) {
     // Output
     printf("The keyword '%s' appeared %ld times in '%s'\n", keyword, total, filename);
     printf("Execution time: %.6f seconds (with %d threads)\n",
-           end_time - start_time, omp_get_max_threads());
+           end_time - start_time, NUM_OF_THREADS);
 
     return EXIT_SUCCESS;
 }
