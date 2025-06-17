@@ -1,8 +1,8 @@
-
+#define _GNU_SOURCE 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h> // To get the execution time
+#include <time.h>
 
 
 int count_keyword_occurrences(const char *line, const char *keyword) {
@@ -31,7 +31,10 @@ int main(int argc, char *argv[]) {
     }
 
     while ((read = getline(&line, &len, file)) != -1) {
-        total_count += count_keyword_occurrences(line, keyword);
+        if (count_keyword_occurrences(line, keyword)) {
+            total_count++;
+            printf("[MATCH] %s", line); e
+        }
     }
 
     fclose(file);

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     while ((read = getline(&line, &len, file)) != -1) {
         if (read && line[read - 1] == '\n') {
-            line[read - 1] = '\0'; // strip newline
+            line[read - 1] = '\0'; // strip newline character
         }
 
         if (nlines == cap) {
@@ -68,7 +68,13 @@ int main(int argc, char *argv[]) {
     long total = 0;
 #pragma omp parallel for reduction(+:total) schedule(static)
     for (size_t i = 0; i < nlines; ++i) {
-        total += count_keyword_occurrences(lines[i], keyword);
+        if (count_keyword_occurrences(lines[i], keyword)) {
+            total += 1;
+#pragma omp critical
+            {
+                printf("[MATCH] %s\n", lines[i]);
+            }
+        }
     }
 
     double end_time = omp_get_wtime();
