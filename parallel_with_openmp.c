@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     const char *keyword = argv[2];
 
     FILE *file = fopen(filename, "r");
-    if (!file) {
+    if (!file) {    
         perror("Error opening file");
         return EXIT_FAILURE;
     }
@@ -70,12 +70,12 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < nlines; ++i) {
         if (count_keyword_occurrences(lines[i], keyword)) {
             total += 1;
-#pragma omp critical
-            {
-                printf("[MATCH] %s\n", lines[i]);
-            }
-        }
-    }
+// #pragma omp critical
+//             {
+//                 printf("[MATCH] %s\n", lines[i]);
+//             }
+         }
+     }
 
     double end_time = omp_get_wtime();
 

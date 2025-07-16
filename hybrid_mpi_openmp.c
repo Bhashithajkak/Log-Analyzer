@@ -1,10 +1,12 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 #include <mpi.h>
 
 #define CHUNK_INIT 4096
-#define VERBOSE 0  // Set to 1 if you want to print matched lines
+#define VERBOSE 0  // Set to 1 to print matched lines
 
 static inline int count_keyword_occurrences(const char *line, const char *keyword) {
     return (keyword[0] && strstr(line, keyword)) ? 1 : 0;
@@ -69,15 +71,14 @@ int main(int argc, char *argv[]) {
         fclose(file);
     }
 
-    // Broadcast total number of lines
+    // Broadcast line count
     MPI_Bcast(&nlines, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
 
-    // Determine how many lines each process should handle
+    // Distribute line counts
     size_t lines_per_proc = nlines / size;
     size_t remainder = nlines % size;
     size_t my_share = lines_per_proc + (rank < remainder ? 1 : 0);
 
-    // Allocate memory for local lines
     char **my_lines = malloc(my_share * sizeof(char *));
     if (!my_lines) {
         perror("malloc failed");
@@ -112,19 +113,27 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Start timer
+    // Start timing (wall clock)
     double start_time = MPI_Wtime();
 
+    // Set number of OpenMP threads
+    omp_set_num_threads(omp_get_max_threads());
+
+    // OpenMP parallel processing of local data
     long local_total = 0;
+
+#pragma omp parallel for reduction(+:local_total) schedule(static)
     for (size_t i = 0; i < my_share; ++i) {
         if (count_keyword_occurrences(my_lines[i], keyword)) {
             local_total++;
 #if VERBOSE
+#pragma omp critical
             printf("[MATCH from rank %d] %s\n", rank, my_lines[i]);
 #endif
         }
     }
 
+    // Reduce counts from all processes
     long global_total = 0;
     MPI_Reduce(&local_total, &global_total, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 
@@ -132,8 +141,8 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         printf("The keyword '%s' appeared %ld times in '%s'\n", keyword, global_total, filename);
-        printf("Execution time: %.6f seconds (with %d processes)\n",
-               end_time - start_time, size);
+        printf("Execution time: %.6f seconds (with %d MPI processes and %d OpenMP threads per process)\n",
+               end_time - start_time, size, omp_get_max_threads());
     }
 
     // Cleanup

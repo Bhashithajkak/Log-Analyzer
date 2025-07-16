@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     while ((read = getline(&line, &len, file)) != -1) {
         if (count_keyword_occurrences(line, keyword)) {
             total_count++;
-            printf("[MATCH] %s", line); e
+           // printf("[MATCH] %s", line); 
         }
     }
 
